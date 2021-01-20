@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>QUICK SORT ALGORITHM</title>
+
+    <style>
+        body{
+            background-color: #353b41;
+            display: grid;
+        }
+        canvas{
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #1a1c18;
+            box-shadow: 0px 5px 20px 10px #1a1c1838;
+        }
+    </style>
+</head>
+<body onload="start()">
+    <canvas></canvas>
+
+    <script type="text/javascript">
+
+        const ArraySize = 1000;
+        const canvas = document.getElementsByTagName('canvas')[0];
+        const context = canvas.getContext('2d');
+        const padding = 10;
+
+        async function start(){
+            canvas.width = 1280;
+            canvas.height = 720;
+
+            let initialRandomArray = setArray(ArraySize);
+            updateVisualization(initialRandomArray)
+
+            await quickSort(initialRandomArray, 0, initialRandomArray.length - 1);
+        }
+
+        function setArray(size){
+            let arr = new Array(size);
+
+            for(let i = 0; i < size; i++){
+                arr[i] = Math.floor(Math.random() * 100) + 1;
+            }
+
+            return arr;
+        }
+
+        function visualizeArr(arr){
+            const side = ( canvas.width - padding * 2 ) / arr.length;
+
+            context.fillStyle = '#848c90';
+            for(let i = 0; i < arr.length; i++) {
+                const heightMappedValue = map(arr[i], 1, 100, 20, canvas.height - padding * 2);
+
+                context.fillRect(i * side + padding, (canvas.height - padding) - heightMappedValue, side, heightMappedValue);
+            }
+        }
+
+        function updateVisualization(arr){
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            visualizeArr(arr);
+        }
+
+        function map(value, start1, stop1, start2, stop2){
+            return (value - start1) / (stop1 - start1) * (stop2 - start2) + start2;
+        }
+
+        async function quickSort(arr, start, end){
+            //if(!end) end = arr.length - 1;
+            if(start >= end) return;
+
+            let pivotIndex = await partition(arr, start, end);
+
+            // 'Simultaneously' solve both partitions of the array
+            await Promise.all([
+                quickSort(arr, start, pivotIndex - 1),
+                quickSort(arr, pivotIndex + 1, end)
+            ]);
+        }
+
+        // Lomuto Partition Scheme
+        async function partition(arr, start, end){
+            // arbitrarily choose the pivot to be the last element
+            let pivot = arr[end]; 
+
+            let pivotIndex = start;
+
+            // loop through the array => every number greater then the pivot
+            // goes to its right and the ones smaller to the left then the
+            // algorithm recursively call partitioning in the adjacent parts
+            // untill everithing the array is sorted
+
+            for(let i = start; i < end; i++){
+                if(arr[i] < pivot){
+                    await swap(arr, i, pivotIndex);
+                    pivotIndex++;
+                }
+            }
+
+            await swap(arr, pivotIndex, end);
+            return pivotIndex;
+        }
+
+        async function swap(arr, iA, iB){
+            await sleep(10);
+
+            const temp = arr[iA];
+            arr[iA] = arr[iB];
+            arr[iB] = temp;
+
+            updateVisualization(arr);
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+    </script>
+</body>
+</html>
